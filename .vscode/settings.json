@@ -1,0 +1,20 @@
+{
+    "robloxlsp.runtime.robloxSecurity": "",
+    "robloxlsp.workspace.rojoProjectFile": "default.project.json",
+    "robloxlsp.diagnostics.globals": [
+        "plugin"
+    ],
+    "[lua]": {
+        "editor.defaultFormatter": "JohnnyMorganz.stylua",
+        "editor.formatOnSave": true
+    },
+    "[luau]": {
+        "editor.defaultFormatter": "JohnnyMorganz.stylua",
+        "editor.formatOnSave": true
+    },
+    "files.associations": {
+        "*.server.lua": "luau",
+        "*.client.lua": "luau",
+        "*.lua": "luau"
+    }
+}
