@@ -11,6 +11,7 @@ local LeaveRoomEvent = Events:WaitForChild("LeaveRoom")
 local UpdateRoomsEvent = Events:WaitForChild("UpdateRooms")
 local RoomStateChangedEvent = Events:WaitForChild("RoomStateChanged")
 local FeedbackEvent = Events:WaitForChild("FeedbackEvent")
+local StartGameEvent = Events:WaitForChild("StartGame")
 
 local Rooms = {}
 local PlayerRooms = {}
@@ -144,6 +145,17 @@ CreateRoomEvent.OnServerInvoke = function(player)
     return true, roomId
 end
 
+StartGameEvent.OnServerEvent:Connect(function(player)
+    local roomId = PlayerRooms[player]
+    if not roomId then return end
+    
+    local room = Rooms[roomId]
+    if room and room.host == player and room.state == "Waiting" then
+        room.state = "Playing"
+        broadcastRoomState(room)
+    end
+end)
+
 JoinRoomEvent.OnServerInvoke = function(player, roomId)
     if PlayerRooms[player] then return false, "Already in a room." end
     
@@ -159,13 +171,6 @@ JoinRoomEvent.OnServerInvoke = function(player, roomId)
     
     broadcastRooms()
     broadcastRoomState(room)
-    
-    -- Auto start if full (or host can start manually later, here we just start if > 1 for simplicity)
-    if #room.players >= 2 then
-        task.wait(2)
-        room.state = "Playing"
-        broadcastRoomState(room)
-    end
     
     return true
 end
@@ -268,11 +273,6 @@ PlayAgainEvent.OnServerEvent:Connect(function(player)
         end
         
         broadcastRooms()
-        broadcastRoomState(room)
-        
-        -- Auto start again
-        task.wait(2)
-        room.state = "Playing"
         broadcastRoomState(room)
     end
 end)

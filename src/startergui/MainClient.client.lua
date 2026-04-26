@@ -11,6 +11,7 @@ local LeaveRoomEvent = Events:WaitForChild("LeaveRoom")
 local UpdateRoomsEvent = Events:WaitForChild("UpdateRooms")
 local RoomStateChangedEvent = Events:WaitForChild("RoomStateChanged")
 local FeedbackEvent = Events:WaitForChild("FeedbackEvent")
+local StartGameEvent = Events:WaitForChild("StartGame")
 
 -- ==========================================
 -- AUTO GENERATE UI (Agar langsung bisa main!)
@@ -83,7 +84,11 @@ UIListLayout.Padding = UDim.new(0, 10)
 -- 2. GAME UI
 local GameFrame = createBasicFrame("GameFrame", false)
 local GameHeader = createText(GameFrame, "Menunggu Pemain...", 0.05, 0.1)
-local AyatLabel = createText(GameFrame, "Ayat akan muncul di sini", 0.2, 0.3)
+
+local StartGameBtn = createButton(GameFrame, "MULAI GAME", 0.15)
+StartGameBtn.Visible = false
+
+local AyatLabel = createText(GameFrame, "Ayat akan muncul di sini", 0.25, 0.3)
 AyatLabel.TextColor3 = Color3.fromRGB(255, 220, 100)
 
 local AnswerBox = Instance.new("TextBox")
@@ -175,8 +180,18 @@ RoomStateChangedEvent.OnClientEvent:Connect(function(stateData)
         AyatLabel.Text = "-"
         AnswerBox.Visible = false
         
+        -- Cek apakah player ini adalah Host dengan iterasi stateData.players
+        local isThisPlayerHost = false
+        for _, p in ipairs(stateData.players) do
+            if p.name == LocalPlayer.Name then
+                isThisPlayerHost = p.isHost
+            end
+        end
+        StartGameBtn.Visible = isThisPlayerHost
+        
     elseif stateData.state == "Playing" then
         switchUI(GameFrame)
+        StartGameBtn.Visible = false
         
         local isMyTurn = false
         local playersTxt = ""
@@ -228,6 +243,10 @@ FeedbackEvent.OnClientEvent:Connect(function(isCorrect, msg)
     task.delay(3, function()
         if FeedbackLabel.Text == msg then FeedbackLabel.Text = "" end
     end)
+end)
+
+StartGameBtn.MouseButton1Click:Connect(function()
+    StartGameEvent:FireServer()
 end)
 
 -- END LOGIC

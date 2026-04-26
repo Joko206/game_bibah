@@ -12,6 +12,7 @@
         "CreateRoom": { "$className": "RemoteFunction" },
         "JoinRoom": { "$className": "RemoteFunction" },
         "SubmitAnswer": { "$className": "RemoteFunction" },
+        "StartGame": { "$className": "RemoteEvent" },
         "PlayAgain": { "$className": "RemoteEvent" },
         "LeaveRoom": { "$className": "RemoteEvent" },
         "UpdateRooms": { "$className": "RemoteEvent" },
