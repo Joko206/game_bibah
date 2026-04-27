@@ -6,7 +6,7 @@ local SurahData = {
             "alhamdulillahi rabbil alamin",
             "arrahmanirrahim",
             "maliki yaumiddin",
-            "iyyaka na'budu wa iyyaka نستعين",
+            "iyyaka na'budu wa iyyaka nasta'in",
             "ihdinassiratal mustaqim",
             "siratal ladzina an'amta alaihim",
             "ghairil maghdubi alaihim walad dhallin"
