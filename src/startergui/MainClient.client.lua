@@ -82,13 +82,7 @@ local function createPanel(name, size, position, visible)
     return panel
 end
 
-local Backdrop = Instance.new("Frame")
-Backdrop.Name = "Backdrop"
-Backdrop.Size = UDim2.fromScale(1, 1)
-Backdrop.Position = UDim2.fromScale(0, 0)
-Backdrop.BackgroundColor3 = PALETTE.backgroundTop
-Backdrop.Parent = ScreenGui
-applyGradient(Backdrop, PALETTE.backgroundTop, PALETTE.backgroundBottom)
+-- Backdrop dihapus agar dunia 3D (lobby masjid & arena) dapat terlihat dengan jelas
 
 local function createLabel(parent, text, size, position, font, color, scaled, align)
     local label = Instance.new("TextLabel")
