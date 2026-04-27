@@ -1,7 +1,23 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
+local Lighting = game:GetService("Lighting")
 local SurahData = require(ReplicatedStorage.Shared.SurahData)
+
+-- ==========================================
+-- CINEMATIC LIGHTING
+-- ==========================================
+local bloom = Lighting:FindFirstChildOfClass("BloomEffect") or Instance.new("BloomEffect")
+bloom.Intensity = 1.2
+bloom.Size = 24
+bloom.Threshold = 0.8
+bloom.Parent = Lighting
+
+local cc = Lighting:FindFirstChildOfClass("ColorCorrectionEffect") or Instance.new("ColorCorrectionEffect")
+cc.Contrast = 0.15
+cc.Saturation = 0.3
+cc.TintColor = Color3.fromRGB(240, 250, 255)
+cc.Parent = Lighting
 
 local Events = ReplicatedStorage:WaitForChild("Events")
 local CreateRoomEvent = Events:WaitForChild("CreateRoom")
@@ -30,77 +46,256 @@ local function createArena(roomId)
     arenaModel.Name = "Arena_" .. roomId
     arenaModel.Parent = Workspace
     
-    -- Spectator Platform
+    -- Pencahayaan
+    local ambientLight = Instance.new("PointLight")
+    ambientLight.Range = 60
+    ambientLight.Brightness = 3
+    ambientLight.Color = Color3.fromRGB(150, 200, 255)
+    
+    -- Particle Effect (Debu Kosmik)
+    local dust = Instance.new("ParticleEmitter")
+    dust.Color = ColorSequence.new(Color3.fromRGB(255, 230, 150))
+    dust.Size = NumberSequence.new({NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(0.5, 0.4), NumberSequenceKeypoint.new(1, 0)})
+    dust.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.5, 0.5), NumberSequenceKeypoint.new(1, 1)})
+    dust.Lifetime = NumberRange.new(2, 5)
+    dust.Rate = 50
+    dust.Speed = NumberRange.new(1, 3)
+    dust.SpreadAngle = Vector2.new(180, 180)
+    
+    -- Spectator Platform (Ruang Tunggu)
     local specPlatform = Instance.new("Part")
     specPlatform.Name = "SpectatorPlatform"
-    specPlatform.Size = Vector3.new(40, 1, 20)
+    specPlatform.Size = Vector3.new(40, 2, 20)
     specPlatform.Position = offset + Vector3.new(0, 0, -50)
     specPlatform.Anchored = true
-    specPlatform.BrickColor = BrickColor.new("Dark stone grey")
+    specPlatform.Material = Enum.Material.Glass
+    specPlatform.BrickColor = BrickColor.new("Navy blue")
     specPlatform.Parent = arenaModel
     
-    -- Start Platform (Challenge)
+    local d1 = dust:Clone()
+    d1.Parent = specPlatform
+    
+    local specGlow = Instance.new("Part")
+    specGlow.Size = Vector3.new(42, 1, 22)
+    specGlow.Position = specPlatform.Position - Vector3.new(0, 0.5, 0)
+    specGlow.Anchored = true
+    specGlow.Material = Enum.Material.Neon
+    specGlow.BrickColor = BrickColor.new("Cyan")
+    specGlow.Parent = arenaModel
+    
+    local l1 = ambientLight:Clone()
+    l1.Parent = specPlatform
+
+    -- Tembok Pelindung Spectator
+    local function createWall(size, pos)
+        local w = Instance.new("Part")
+        w.Size = size
+        w.Position = pos
+        w.Anchored = true
+        w.Material = Enum.Material.ForceField -- Lebih futuristik dari kaca
+        w.BrickColor = BrickColor.new("Cyan")
+        w.Parent = arenaModel
+    end
+    
+    local wallH = 15
+    createWall(Vector3.new(1, wallH, 20), specPlatform.Position + Vector3.new(-20, wallH/2, 0)) -- Kiri
+    createWall(Vector3.new(1, wallH, 20), specPlatform.Position + Vector3.new(20, wallH/2, 0))  -- Kanan
+    createWall(Vector3.new(40, wallH, 1), specPlatform.Position + Vector3.new(0, wallH/2, -10)) -- Belakang
+    createWall(Vector3.new(40, wallH, 1), specPlatform.Position + Vector3.new(0, wallH/2, 10))  -- Depan
+
+    -- Start Platform (Arena Utama)
     local startPlatform = Instance.new("Part")
     startPlatform.Name = "StartPlatform"
-    startPlatform.Size = Vector3.new(40, 1, 20)
+    startPlatform.Size = Vector3.new(40, 2, 20)
     startPlatform.Position = offset + Vector3.new(0, 0, 0)
     startPlatform.Anchored = true
-    startPlatform.BrickColor = BrickColor.new("Bright blue")
+    startPlatform.Material = Enum.Material.SmoothPlastic
+    startPlatform.BrickColor = BrickColor.new("Dark stone grey")
     startPlatform.Parent = arenaModel
     
-    -- Question Board
+    local d2 = dust:Clone()
+    d2.Parent = startPlatform
+    
+    local startGlow = Instance.new("Part")
+    startGlow.Size = Vector3.new(42, 1, 22)
+    startGlow.Position = startPlatform.Position - Vector3.new(0, 0.5, 0)
+    startGlow.Anchored = true
+    startGlow.Material = Enum.Material.Neon
+    startGlow.BrickColor = BrickColor.new("Gold")
+    startGlow.Parent = arenaModel
+    
+    local l2 = ambientLight:Clone()
+    l2.Brightness = 1.5 -- Dikurangi agar tidak membuat silau
+    l2.Color = Color3.fromRGB(255, 200, 100)
+    l2.Parent = startPlatform
+    
+    -- SUCCESS PLATFORM (Zona Aman di Belakang Pintu)
+    local successPlatform = Instance.new("Part")
+    successPlatform.Name = "SuccessPlatform"
+    successPlatform.Size = Vector3.new(40, 2, 20)
+    successPlatform.Position = offset + Vector3.new(0, 0, 21)
+    successPlatform.Anchored = true
+    successPlatform.Material = Enum.Material.SmoothPlastic
+    successPlatform.BrickColor = BrickColor.new("Dark stone grey")
+    successPlatform.Parent = arenaModel
+    
+    local successGlow = Instance.new("Part")
+    successGlow.Size = Vector3.new(42, 1, 22)
+    successGlow.Position = successPlatform.Position - Vector3.new(0, 0.5, 0)
+    successGlow.Anchored = true
+    successGlow.Material = Enum.Material.Neon
+    successGlow.BrickColor = BrickColor.new("Lime green")
+    successGlow.Parent = arenaModel
+    
+    local l3 = ambientLight:Clone()
+    l3.Brightness = 2
+    l3.Color = Color3.fromRGB(150, 255, 150)
+    l3.Parent = successPlatform
+
+    -- HELL PIT (Lautan Api Neraka di Bawah)
+    local hellPit = Instance.new("Part")
+    hellPit.Name = "HellPit"
+    hellPit.Size = Vector3.new(300, 10, 300)
+    hellPit.Position = offset + Vector3.new(0, -150, 0)
+    hellPit.Anchored = true
+    hellPit.Material = Enum.Material.Neon
+    hellPit.BrickColor = BrickColor.new("Really red")
+    hellPit.Parent = arenaModel
+    
+    local fire = Instance.new("ParticleEmitter")
+    fire.Color = ColorSequence.new(Color3.fromRGB(255, 30, 0), Color3.fromRGB(255, 150, 0))
+    fire.Size = NumberSequence.new({NumberSequenceKeypoint.new(0, 5), NumberSequenceKeypoint.new(1, 20)})
+    fire.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(1, 1)})
+    fire.Lifetime = NumberRange.new(3, 5)
+    fire.Rate = 500
+    fire.Speed = NumberRange.new(20, 40)
+    fire.EmissionDirection = Enum.NormalId.Top
+    fire.Parent = hellPit
+    
+    -- Membunuh pemain yang jatuh ke neraka
+    hellPit.Touched:Connect(function(hit)
+        local h = hit.Parent:FindFirstChild("Humanoid")
+        if h then h.Health = 0 end
+    end)
+
+    -- Pilar Cahaya Bergaya Sci-Fi
+    for _, xPos in ipairs({-19, 19}) do
+        local pillar = Instance.new("Part")
+        pillar.Shape = Enum.PartType.Cylinder
+        pillar.Size = Vector3.new(20, 3, 3) -- Orientation Cylinder di Roblox membentang di sumbu X
+        pillar.CFrame = CFrame.new(startPlatform.Position + Vector3.new(xPos, 10, 8)) * CFrame.Angles(0, 0, math.pi/2)
+        pillar.Anchored = true
+        pillar.Material = Enum.Material.Neon
+        pillar.BrickColor = BrickColor.new("Cyan")
+        pillar.Parent = arenaModel
+        
+        -- Cincin Emas melayang di pilar
+        local ring = Instance.new("Part")
+        ring.Shape = Enum.PartType.Cylinder
+        ring.Size = Vector3.new(2, 3.5, 3.5)
+        ring.CFrame = CFrame.new(startPlatform.Position + Vector3.new(xPos, 15, 8)) * CFrame.Angles(0, 0, math.pi/2)
+        ring.Anchored = true
+        ring.Material = Enum.Material.Neon
+        ring.BrickColor = BrickColor.new("Gold")
+        ring.Parent = arenaModel
+    end
+
+    -- Papan Soal Raksasa
     local qBoard = Instance.new("Part")
     qBoard.Name = "QuestionBoard"
-    qBoard.Size = Vector3.new(30, 15, 1)
-    qBoard.Position = offset + Vector3.new(0, 8, 20)
+    qBoard.Size = Vector3.new(34, 18, 2)
+    qBoard.Position = offset + Vector3.new(0, 26, 22) -- Diangkat tinggi ke Y=26 agar tidak terhalang pintu
     qBoard.Anchored = true
-    qBoard.BrickColor = BrickColor.new("Really black")
+    qBoard.Material = Enum.Material.Neon
+    qBoard.BrickColor = BrickColor.new("Cyan")
     qBoard.Parent = arenaModel
     
+    local qScreen = Instance.new("Part")
+    qScreen.Size = Vector3.new(32, 16, 2.2)
+    qScreen.Position = qBoard.Position
+    qScreen.Anchored = true
+    qScreen.Material = Enum.Material.SmoothPlastic
+    qScreen.BrickColor = BrickColor.new("Really black")
+    qScreen.Parent = arenaModel
+    
     local qGui = Instance.new("SurfaceGui")
-    qGui.Face = Enum.NormalId.Back
-    qGui.Parent = qBoard
+    qGui.Face = Enum.NormalId.Front
+    qGui.SizingMode = Enum.SurfaceGuiSizingMode.FixedSize
+    qGui.CanvasSize = Vector2.new(1600, 800)
+    qGui.Parent = qScreen
+    
     local qText = Instance.new("TextLabel")
     qText.Name = "Text"
-    qText.Size = UDim2.new(1, 0, 1, 0)
+    qText.Size = UDim2.new(0.9, 0, 0.9, 0)
+    qText.Position = UDim2.new(0.05, 0, 0.05, 0)
     qText.BackgroundTransparency = 1
     qText.TextScaled = true
-    qText.TextColor3 = Color3.new(1, 1, 1)
+    qText.TextWrapped = true
+    qText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    qText.Font = Enum.Font.GothamBold
     qText.Text = "Menunggu Game Dimulai..."
     qText.Parent = qGui
     
-    -- 3 Doors (Paths)
+    local uiStroke = Instance.new("UIStroke")
+    uiStroke.Color = Color3.fromRGB(0, 200, 255)
+    uiStroke.Thickness = 3
+    uiStroke.Parent = qText
+    
+    -- 3 Pintu Tegak (Berdiri)
     local doors = {}
     for i = 1, 3 do
         local door = Instance.new("Part")
         door.Name = "Door_" .. i
-        door.Size = Vector3.new(8, 1, 20)
-        door.Position = offset + Vector3.new((i-2)*12, 0, 15)
+        door.Size = Vector3.new(10, 14, 1) -- Lebar 10, Tinggi 14, Tebal 1
+        door.Position = offset + Vector3.new((i-2)*13, 7, 10.5) -- Rapat dengan batas depan StartPlatform (Z=10)
         door.Anchored = true
-        door.BrickColor = BrickColor.new("Medium stone grey")
+        door.Material = Enum.Material.SmoothPlastic
+        door.BrickColor = BrickColor.new("Really black") -- Diganti hitam agar tidak menyilaukan
         door.Parent = arenaModel
         
+        local dGlow = Instance.new("Part")
+        dGlow.Name = "Glow"
+        dGlow.Size = Vector3.new(10.5, 14.5, 0.5)
+        dGlow.Position = door.Position + Vector3.new(0, 0, 0.5) -- Dipindah ke belakang pintu agar tidak menutupi teks di depan (-Z)
+        dGlow.Anchored = true
+        dGlow.Material = Enum.Material.Neon
+        dGlow.BrickColor = BrickColor.new("Medium stone grey")
+        dGlow.Parent = door
+        
         local dGui = Instance.new("SurfaceGui")
-        dGui.Face = Enum.NormalId.Top
+        dGui.Face = Enum.NormalId.Front
+        dGui.SizingMode = Enum.SurfaceGuiSizingMode.FixedSize
+        dGui.CanvasSize = Vector2.new(500, 700)
         dGui.Parent = door
+        
         local dText = Instance.new("TextLabel")
         dText.Name = "Text"
-        dText.Size = UDim2.new(1, 0, 1, 0)
+        dText.Size = UDim2.new(0.9, 0, 0.9, 0)
+        dText.Position = UDim2.new(0.05, 0, 0.05, 0)
         dText.BackgroundTransparency = 1
         dText.TextScaled = true
-        dText.TextColor3 = Color3.new(0, 0, 0)
+        dText.TextWrapped = true
+        dText.TextColor3 = Color3.fromRGB(255, 255, 255) -- Teks putih
+        dText.Font = Enum.Font.GothamBold
         dText.Text = "Opsi " .. i
         dText.Parent = dGui
+        
+        local uiStroke = Instance.new("UIStroke")
+        uiStroke.Color = Color3.fromRGB(0, 200, 255)
+        uiStroke.Thickness = 2
+        uiStroke.Parent = dText
         
         table.insert(doors, door)
     end
     
     return {
         model = arenaModel,
-        specPos = specPlatform.Position + Vector3.new(0, 3, 0),
-        startPos = startPlatform.Position + Vector3.new(0, 3, 0),
+        startPos = startPlatform.Position + Vector3.new(0, 5, 0),
+        specPos = specPlatform.Position + Vector3.new(0, 5, 0),
         qText = qText,
-        doors = doors
+        doors = doors,
+        startPlatform = startPlatform,
+        startGlow = startGlow
     }
 end
 
@@ -168,6 +363,8 @@ local function getNextTurn(room)
     return nil
 end
 
+local TARGET_SCORE = 100 -- Butuh 10 soal (100 poin) untuk menang
+
 local function checkGameOver(room)
     local aliveCount = 0
     local highestScore = -1
@@ -177,30 +374,42 @@ local function checkGameOver(room)
         if room.lives[p] > 0 then
             aliveCount = aliveCount + 1
         end
-    end
-
-    local ayatCompleted = false
-    if room.surahIndex and SurahData[room.surahIndex] then
-        if room.ayatIndex >= #SurahData[room.surahIndex].ayat then
-            ayatCompleted = true
+        if (room.scores[p] or 0) >= TARGET_SCORE then
+            winner = p
         end
     end
 
-    if aliveCount <= 1 or ayatCompleted then
+    local isMultiplayer = #room.players > 1
+    local isGameOver = false
+    
+    if winner then
+        isGameOver = true -- Seseorang mencapai 100 poin
+    elseif aliveCount == 0 then
+        isGameOver = true -- Semua orang mati (termasuk main solo)
+    elseif isMultiplayer and aliveCount == 1 then
+        isGameOver = true -- Di multiplayer, orang terakhir yang hidup menang
+    end
+
+    if isGameOver then
         room.state = "Ended"
         
-        for _, p in ipairs(room.players) do
-            if (room.scores[p] or 0) > highestScore then
-                highestScore = room.scores[p]
-                winner = p
+        -- Tentukan pemenang
+        if not winner and aliveCount == 1 and isMultiplayer then
+            for _, p in ipairs(room.players) do
+                if room.lives[p] > 0 then winner = p end
             end
         end
-        room.winner = winner and winner.Name or "Tidak ada"
-        room.arena.qText.Text = "GAME OVER! Pemenang: " .. room.winner
         
-        -- Teleport all back to spec
+        room.winner = winner and winner.Name or "Tidak ada"
+        if room.winner == "Tidak ada" then
+            room.arena.qText.Text = "GAME OVER! Semua pemain gugur."
+        else
+            room.arena.qText.Text = "SELAMAT! Pemenang: " .. room.winner
+        end
+        
+        -- Teleport all back to MOSQUE LOBBY (Vector3.new(0, 5, -40))
         for _, p in ipairs(room.players) do
-            teleportPlayer(p, room.arena.specPos)
+            teleportPlayer(p, Vector3.new(0, 5, -40))
         end
         
         return true
@@ -209,6 +418,22 @@ local function checkGameOver(room)
 end
 
 local function updateArenaQuestion(room)
+    local surah = SurahData[room.surahIndex]
+    local isLastAyat = (room.ayatIndex == #surah.ayat)
+    
+    -- Pastikan lantai tertutup kembali setelah ada yang jatuh ke neraka
+    room.arena.startPlatform.CanCollide = true
+    room.arena.startPlatform.Transparency = 0
+    room.arena.startGlow.CanCollide = true
+    room.arena.startGlow.Transparency = 0
+    
+    -- Pastikan pintu tertutup kembali dan warnanya di-reset
+    for _, door in ipairs(room.arena.doors) do
+        door.CanCollide = true
+        door.Transparency = 0
+        door.BrickColor = BrickColor.new("Really black")
+    end
+    
     if room.state ~= "Playing" then return end
     
     local currentSurah = SurahData[room.surahIndex]
@@ -216,8 +441,12 @@ local function updateArenaQuestion(room)
     local correctAnswer = currentSurah.ayat[room.ayatIndex + 1]
     
     if not correctAnswer then
-        checkGameOver(room)
-        return
+        -- Surah habis, ganti ke surah acak baru!
+        room.surahIndex = math.random(1, #SurahData)
+        room.ayatIndex = 1
+        currentSurah = SurahData[room.surahIndex]
+        currentAyat = currentSurah.ayat[room.ayatIndex]
+        correctAnswer = currentSurah.ayat[room.ayatIndex + 1]
     end
     
     -- Setup Question Text
@@ -251,11 +480,11 @@ local function updateArenaQuestion(room)
         -- Disconnect old touches
         if room.doorConnections[i] then room.doorConnections[i]:Disconnect() end
         
+        local glow = door:FindFirstChild("Glow")
+        if glow then glow.BrickColor = BrickColor.new("Medium stone grey") end
+        
         if options[i] == correctAnswer then
             room.currentCorrectDoorIndex = i
-            door.BrickColor = BrickColor.new("Medium stone grey")
-        else
-            door.BrickColor = BrickColor.new("Medium stone grey")
         end
         
         room.doorConnections[i] = door.Touched:Connect(function(hit)
@@ -267,21 +496,31 @@ local function updateArenaQuestion(room)
                 
                 if i == room.currentCorrectDoorIndex then
                     -- Correct!
-                    door.BrickColor = BrickColor.new("Lime green")
+                    if room.doorConnections[i] then room.doorConnections[i]:Disconnect() end
+                    if not room.scores[player] then room.scores[player] = 0 end
                     room.scores[player] = room.scores[player] + 10
+                    
+                    door.BrickColor = BrickColor.new("Bright green")
+                    door.CanCollide = false -- Nembus!
+                    door.Transparency = 0.5
+                    if glow then glow.BrickColor = BrickColor.new("Lime green") end
+                    
+                    -- Biarkan pemain berlari menembus pintu ke platform aman
+                    task.wait(1.5)
+                    
                     room.ayatIndex = room.ayatIndex + 1
                     
-                    teleportPlayer(player, room.arena.specPos)
-                    
-                    if not checkGameOver(room) then
+                    local isOver = checkGameOver(room)
+                    if not isOver then
+                        teleportPlayer(player, room.arena.specPos)
                         room.turnIndex = getNextTurn(room)
-                        local nextPlayer = room.players[room.turnIndex]
-                        teleportPlayer(nextPlayer, room.arena.startPos)
-                        updateArenaQuestion(room)
+                        if room.turnIndex then
+                            local nextPlayer = room.players[room.turnIndex]
+                            updateArenaQuestion(room)
+                            teleportPlayer(nextPlayer, room.arena.startPos)
+                        end
                     end
                 else
-                    -- Wrong! (Killbrick)
-                    door.BrickColor = BrickColor.new("Really red")
                     room.lives[player] = room.lives[player] - 1
                     local hum = char:FindFirstChild("Humanoid")
                     if hum then hum.Health = 0 end
@@ -296,7 +535,7 @@ local function updateArenaQuestion(room)
                 
                 broadcastRoomState(room)
                 task.wait(2)
-                door.BrickColor = BrickColor.new("Medium stone grey")
+                if glow then glow.BrickColor = BrickColor.new("Medium stone grey") end
                 room.processingTurn = false
             end
         end)
@@ -305,6 +544,110 @@ end
 
 -- ==========================================
 -- EVENT HANDLERS
+-- ==========================================
+-- PROCEDURAL MOSQUE LOBBY
+-- ==========================================
+local function buildLobbyMosque()
+    local lobbyModel = Instance.new("Model")
+    lobbyModel.Name = "LobbyMosque"
+    lobbyModel.Parent = Workspace
+    
+    -- Hapus Baseplate Bawaan
+    local oldBaseplate = Workspace:FindFirstChild("Baseplate")
+    if oldBaseplate then oldBaseplate:Destroy() end
+
+    -- Plaza Utama (Lobby Floor)
+    local plaza = Instance.new("Part")
+    plaza.Name = "Plaza"
+    plaza.Size = Vector3.new(200, 2, 200)
+    plaza.Position = Vector3.new(0, -1, 0)
+    plaza.Anchored = true
+    plaza.Material = Enum.Material.Marble
+    plaza.BrickColor = BrickColor.new("White")
+    plaza.Parent = lobbyModel
+    
+    -- SpawnLocation
+    local spawnLoc = Instance.new("SpawnLocation")
+    spawnLoc.Size = Vector3.new(10, 1, 10)
+    spawnLoc.Position = Vector3.new(0, 0.5, -40)
+    spawnLoc.Anchored = true
+    spawnLoc.Material = Enum.Material.Neon
+    spawnLoc.BrickColor = BrickColor.new("Cyan")
+    spawnLoc.Parent = lobbyModel
+
+    -- Bangunan Utama Masjid
+    local mainBldg = Instance.new("Part")
+    mainBldg.Name = "MainBuilding"
+    mainBldg.Size = Vector3.new(60, 30, 40)
+    mainBldg.Position = Vector3.new(0, 15, 0)
+    mainBldg.Anchored = true
+    mainBldg.Material = Enum.Material.SmoothPlastic
+    mainBldg.BrickColor = BrickColor.new("White")
+    mainBldg.Parent = lobbyModel
+    
+    -- Kubah Utama (Dome)
+    local dome = Instance.new("Part")
+    dome.Name = "Dome"
+    dome.Shape = Enum.PartType.Ball
+    dome.Size = Vector3.new(35, 35, 35)
+    dome.Position = Vector3.new(0, 30 + 17.5 - 5, 0) -- ditenggelamkan sedikit
+    dome.Anchored = true
+    dome.Material = Enum.Material.Neon
+    dome.BrickColor = BrickColor.new("Gold")
+    dome.Parent = lobbyModel
+    
+    -- Pintu Masuk Raksasa (Arch)
+    local doorArch = Instance.new("Part")
+    doorArch.Size = Vector3.new(15, 20, 2)
+    doorArch.Position = Vector3.new(0, 10, -20)
+    doorArch.Anchored = true
+    doorArch.Material = Enum.Material.Neon
+    doorArch.BrickColor = BrickColor.new("Cyan")
+    doorArch.Parent = lobbyModel
+    
+    local doorHole = Instance.new("Part")
+    doorHole.Size = Vector3.new(13, 19, 2.2)
+    doorHole.Position = Vector3.new(0, 9.5, -20)
+    doorHole.Anchored = true
+    doorHole.Material = Enum.Material.SmoothPlastic
+    doorHole.BrickColor = BrickColor.new("Really black")
+    doorHole.Parent = lobbyModel
+
+    -- Menara (Minarets)
+    for _, xPos in ipairs({-35, 35}) do
+        local minaret = Instance.new("Part")
+        minaret.Shape = Enum.PartType.Cylinder
+        minaret.Size = Vector3.new(60, 8, 8) -- X=height di Roblox Cylinder
+        minaret.CFrame = CFrame.new(Vector3.new(xPos, 30, -15)) * CFrame.Angles(0, 0, math.pi/2)
+        minaret.Anchored = true
+        minaret.Material = Enum.Material.SmoothPlastic
+        minaret.BrickColor = BrickColor.new("White")
+        minaret.Parent = lobbyModel
+        
+        -- Kubah Kecil Menara
+        local miniDome = Instance.new("Part")
+        miniDome.Shape = Enum.PartType.Ball
+        miniDome.Size = Vector3.new(10, 10, 10)
+        miniDome.Position = Vector3.new(xPos, 60 + 5 - 2, -15)
+        miniDome.Anchored = true
+        miniDome.Material = Enum.Material.Neon
+        miniDome.BrickColor = BrickColor.new("Gold")
+        miniDome.Parent = lobbyModel
+    end
+    
+    -- Cahaya Masjid
+    local lobbyLight = Instance.new("PointLight")
+    lobbyLight.Range = 100
+    lobbyLight.Brightness = 2
+    lobbyLight.Color = Color3.fromRGB(255, 220, 150)
+    lobbyLight.Parent = mainBldg
+end
+
+-- Bangun Masjid saat server pertama kali start
+buildLobbyMosque()
+
+-- ==========================================
+-- EVENTS
 -- ==========================================
 CreateRoomEvent.OnServerInvoke = function(player)
     if PlayerRooms[player] then return false, "You are already in a room." end
