@@ -1,25 +1,28 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local AyatData = require(ReplicatedStorage:WaitForChild("AyatData"))
+local Shared = ReplicatedStorage:WaitForChild("Shared")
+local AyatData = require(Shared:WaitForChild("AyatData"))
 
--- Variabel status game
-local nyawaPemain = 3 [cite: 11]
-local skorPemain = 0 [cite: 10]
+local GameManager = {}
 
-local function muatAyat() [cite: 4]
-    local data = AyatData[math.random(1, #AyatData)]
-    print("Ayat dimuat: " .. data.teks) [cite: 5]
-    return data
+local function normalizeText(text)
+    local lowered = string.lower(text)
+    lowered = string.gsub(lowered, "[^%w%s']", "")
+    lowered = string.gsub(lowered, "%s+", " ")
+    return string.gsub(lowered, "^%s*(.-)%s*$", "%1")
 end
 
--- Simulasi validasi jawaban [cite: 7]
-local function cekJawaban(inputPemain, jawabanBenar)
-    if inputPemain:lower() == jawabanBenar:lower() then
-        skorPemain += 10 [cite: 9, 10]
-        print("Benar! Skor sekarang: " .. skorPemain)
-    else
-        nyawaPemain -= 1 [cite: 8, 11]
-        print("Salah! Sisa nyawa: " .. nyawaPemain)
+function GameManager.getRandomAyat()
+    if #AyatData == 0 then
+        return nil
     end
+    return AyatData[math.random(1, #AyatData)]
 end
 
-muatAyat()
+function GameManager.checkAnswer(inputPlayer, answerExpected)
+    if typeof(inputPlayer) ~= "string" or typeof(answerExpected) ~= "string" then
+        return false
+    end
+    return normalizeText(inputPlayer) == normalizeText(answerExpected)
+end
+
+return GameManager
