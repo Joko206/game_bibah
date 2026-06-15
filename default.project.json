@@ -9,15 +9,15 @@
       },
       "Events": {
         "$className": "Folder",
-        "CreateRoom": { "$className": "RemoteFunction" },
-        "JoinRoom": { "$className": "RemoteFunction" },
-        "SubmitAnswer": { "$className": "RemoteFunction" },
-        "StartGame": { "$className": "RemoteEvent" },
-        "PlayAgain": { "$className": "RemoteEvent" },
-        "LeaveRoom": { "$className": "RemoteEvent" },
-        "UpdateRooms": { "$className": "RemoteEvent" },
-        "RoomStateChanged": { "$className": "RemoteEvent" },
-        "FeedbackEvent": { "$className": "RemoteEvent" }
+        "BuatRuangan": { "$className": "RemoteFunction" },
+        "MasukRuangan": { "$className": "RemoteFunction" },
+        "KirimJawaban": { "$className": "RemoteFunction" },
+        "MulaiPermainan": { "$className": "RemoteEvent" },
+        "MainLagi": { "$className": "RemoteEvent" },
+        "KeluarRuangan": { "$className": "RemoteEvent" },
+        "PerbaruiRuangan": { "$className": "RemoteEvent" },
+        "StatusRuanganBerubah": { "$className": "RemoteEvent" },
+        "AcaraUmpanBalik": { "$className": "RemoteEvent" }
       }
     },
 
@@ -41,8 +41,8 @@
         "$properties": {
           "ResetOnSpawn": false
         },
-        "MainClient": {
-          "$path": "src/startergui/MainClient.client.lua"
+        "KlienUtama": {
+          "$path": "src/startergui/KlienUtama.client.lua"
         }
       }
     },

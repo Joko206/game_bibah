@@ -1,4 +1,4 @@
-const fs = require("fs");
+ const fs = require("fs");
 
 const raw = fs.readFileSync(0, "utf8");
 const payload = JSON.parse(raw);
